@@ -45,8 +45,14 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/streak") ||
     request.nextUrl.pathname.startsWith("/settings");
 
-  // Redirect unauthenticated users away from app routes
-  if (!user && isAppRoute) {
+  // Public app routes — accessible without login
+  const publicRoutes = ["/feed", "/item"];
+  const isPublicRoute = publicRoutes.some((r) =>
+    request.nextUrl.pathname.startsWith(r)
+  );
+
+  // Redirect unauthenticated users away from protected app routes
+  if (!user && isAppRoute && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

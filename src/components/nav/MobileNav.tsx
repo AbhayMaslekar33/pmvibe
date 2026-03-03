@@ -3,17 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
-import { Newspaper, BookOpen, Flame, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Newspaper, BookOpen, Flame, LogIn } from "lucide-react";
 
-const navItems = [
+const publicNavItems = [
   { href: "/feed", label: "Feed", icon: Newspaper },
+];
+
+const protectedNavItems = [
   { href: "/journal", label: "Journal", icon: BookOpen },
   { href: "/streak", label: "Streak", icon: Flame },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
+  const [user, setUser] = useState<unknown>(undefined);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+  }, []);
+
+  const navItems = user
+    ? [...publicNavItems, ...protectedNavItems]
+    : [...publicNavItems, { href: "/login", label: "Log In", icon: LogIn }];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-[var(--card)] px-2 py-1 z-50">

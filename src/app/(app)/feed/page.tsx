@@ -1,7 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 
 export default async function FeedPage() {
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: items } = await supabase
     .from("content_items")
@@ -21,6 +26,20 @@ export default async function FeedPage() {
           </p>
         </div>
       </div>
+
+      {!user && (
+        <div className="mb-6 rounded-lg border bg-[var(--secondary)] px-4 py-3 flex items-center justify-between">
+          <p className="text-sm text-[var(--secondary-foreground)]">
+            Sign up to save reflections, answer opinion prompts, and track your streak.
+          </p>
+          <Link
+            href="/signup"
+            className="ml-4 shrink-0 px-4 py-1.5 text-sm rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+          >
+            Sign Up
+          </Link>
+        </div>
+      )}
 
       {!items || items.length === 0 ? (
         <div className="text-center py-16 text-[var(--muted-foreground)]">
