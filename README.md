@@ -1,12 +1,12 @@
 # PMVIBE
 
-**Reddit, but for Product Managers.**
+**AI-powered PM training ground.**
 
-A daily feed of real product launches and expert PM insights — with AI-powered summaries, structured opinion prompts, and streak-based habit tracking to help aspiring PMs develop genuine product intuition.
+A daily product intelligence platform that helps Product Managers develop real product intuition — not just frameworks. AI-summarized launches, structured opinion prompts, and streak-based habit tracking turn passive reading into active thinking.
 
 ## The Problem
 
-Aspiring product managers prepare through courses, frameworks, and mock interviews. But everyone does that. The gap isn't knowledge — it's **judgment**. Real PM skill comes from consistently engaging with real-world product decisions, forming opinions under ambiguity, and reflecting on trade-offs. There's no platform that makes this a daily habit.
+PMs prepare through courses, frameworks, and mock interviews. But everyone does that. The gap isn't knowledge — it's **judgment**. Real PM skill comes from consistently engaging with real-world product decisions, forming opinions under ambiguity, and reflecting on trade-offs. There's no platform that makes this a daily habit.
 
 ## What PMVIBE Does
 
@@ -41,7 +41,7 @@ User ──► Reflections / Opinions ──► Supabase ──► Streak Tracke
 
 ## Features
 
-- **Feed** — Daily curated content from Product Hunt and Lenny's Newsletter
+- **Public Feed** — Browse daily curated content without signing up
 - **Item Detail** — AI summary, key insights, and 5 structured PM opinion prompts
 - **Reflection Journal** — Free-form journaling per item with autosave
 - **Streak Dashboard** — Current streak, longest streak, 84-day activity heatmap
