@@ -43,13 +43,21 @@ export default async function ItemDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // ai_opinion_prompts and ai_key_insights may be arrays or JSON strings
+  let rawPrompts = item.ai_opinion_prompts;
+  if (typeof rawPrompts === "string") {
+    try { rawPrompts = JSON.parse(rawPrompts); } catch { rawPrompts = null; }
+  }
   const prompts: string[] =
-    (item.ai_opinion_prompts as string[] | null) ??
+    (Array.isArray(rawPrompts) && rawPrompts.length > 0 ? rawPrompts : null) ??
     FALLBACK_PROMPTS[item.source] ??
     FALLBACK_PROMPTS.product_hunt;
 
-  const insights: string[] =
-    (item.ai_key_insights as string[] | null) ?? [];
+  let rawInsights = item.ai_key_insights;
+  if (typeof rawInsights === "string") {
+    try { rawInsights = JSON.parse(rawInsights); } catch { rawInsights = null; }
+  }
+  const insights: string[] = Array.isArray(rawInsights) ? rawInsights : [];
 
   return (
     <div className="max-w-3xl space-y-8">
