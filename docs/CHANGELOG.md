@@ -8,6 +8,8 @@ All notable changes to PMVIBE are documented here.
 - **Feed source tabs (PRD: FeedTabs_and_Carddepth_UI)** — All / Product Hunt / Lenny filter tabs with counts
 - Teal left-border hover effect on feed items (Substack-style)
 - `FeedTabs` client component (`src/components/feed/FeedTabs.tsx`)
+- **Mobile daily challenge (PRD: Mobile-DailyChallenge)** — top bar with logo, profile icon, and daily challenge prompt
+- `MobileTopBar` client component (`src/components/nav/MobileTopBar.tsx`)
 
 ### Changed
 - **Card depth** — added `shadow-sm` to all card sections (item detail, journal, streak, feed CTA)
