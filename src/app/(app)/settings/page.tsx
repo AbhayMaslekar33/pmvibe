@@ -65,7 +65,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold mb-8">Settings</h1>
 
       <form onSubmit={handleSave} className="space-y-4">
         <div>

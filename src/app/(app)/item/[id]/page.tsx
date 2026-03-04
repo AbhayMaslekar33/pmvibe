@@ -97,8 +97,8 @@ export default async function ItemDetailPage({
 
       {/* AI Summary */}
       {item.ai_summary && (
-        <section className="rounded-xl border bg-[var(--card)] p-6">
-          <h2 className="font-semibold mb-3">AI Summary</h2>
+        <section className="rounded-xl border shadow-sm bg-[var(--card)] p-6">
+          <h2 className="text-base font-semibold mb-3">AI Summary</h2>
           <p className="text-[var(--muted-foreground)] leading-relaxed">
             {item.ai_summary}
           </p>
@@ -122,8 +122,8 @@ export default async function ItemDetailPage({
       )}
 
       {/* Opinion Prompts */}
-      <section className="rounded-xl border bg-[var(--card)] p-6">
-        <h2 className="font-semibold mb-1">Think Like a PM</h2>
+      <section className="rounded-xl border shadow-sm bg-[var(--card)] p-6">
+        <h2 className="text-base font-semibold mb-1">Think Like a PM</h2>
         <p className="text-sm text-[var(--muted-foreground)] mb-4">
           Answer these prompts to build your product judgment.
         </p>
@@ -135,8 +135,8 @@ export default async function ItemDetailPage({
       </section>
 
       {/* Reflection Journal */}
-      <section className="rounded-xl border bg-[var(--card)] p-6">
-        <h2 className="font-semibold mb-1">Your Reflection</h2>
+      <section className="rounded-xl border shadow-sm bg-[var(--card)] p-6">
+        <h2 className="text-base font-semibold mb-1">Your Reflection</h2>
         <p className="text-sm text-[var(--muted-foreground)] mb-4">
           What would you have done differently? What stands out?
         </p>

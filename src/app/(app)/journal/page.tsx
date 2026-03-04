@@ -44,7 +44,7 @@ export default function JournalPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-8">
         <h1 className="text-2xl font-bold">Your Journal</h1>
         <p className="text-[var(--muted-foreground)] text-sm">
           All your reflections in one place.
@@ -88,7 +88,7 @@ export default function JournalPage() {
             <a
               key={entry.id}
               href={`/item/${entry.content_items.id}`}
-              className="block rounded-xl border bg-[var(--card)] p-4 hover:shadow-md transition-shadow"
+              className="block rounded-xl border shadow-sm bg-[var(--card)] p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-2 mb-2">
                 <span

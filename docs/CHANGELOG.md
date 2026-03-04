@@ -4,6 +4,16 @@ All notable changes to PMVIBE are documented here.
 
 ## [Unreleased]
 
+### Added
+- **Feed source tabs (PRD: FeedTabs_and_Carddepth_UI)** — All / Product Hunt / Lenny filter tabs with counts
+- Teal left-border hover effect on feed items (Substack-style)
+- `FeedTabs` client component (`src/components/feed/FeedTabs.tsx`)
+
+### Changed
+- **Card depth** — added `shadow-sm` to all card sections (item detail, journal, streak, feed CTA)
+- **Typography spacing** — consistent `mb-8` header margins across all pages
+- Feed item padding increased for better readability
+
 ---
 
 ## 2026-03-04

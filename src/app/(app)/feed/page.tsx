@@ -1,21 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { FeedTabs } from "@/components/feed/FeedTabs";
 
 export const revalidate = 300; // 5 minutes
-
-function timeAgo(date: string) {
-  const seconds = Math.floor(
-    (Date.now() - new Date(date).getTime()) / 1000
-  );
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "yesterday";
-  return `${days}d ago`;
-}
 
 export default async function FeedPage() {
   const supabase = await createClient();
@@ -35,7 +22,7 @@ export default async function FeedPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">Your Feed</h1>
           <p className="text-[var(--muted-foreground)] text-sm">
@@ -45,7 +32,7 @@ export default async function FeedPage() {
       </div>
 
       {!user && (
-        <div className="mb-6 rounded-lg border bg-[var(--secondary)] px-4 py-3 flex items-center justify-between">
+        <div className="mb-6 rounded-lg border shadow-sm bg-[var(--secondary)] px-4 py-3 flex items-center justify-between">
           <p className="text-sm text-[var(--secondary-foreground)]">
             Sign up to save reflections, answer opinion prompts, and track your streak.
           </p>
@@ -67,49 +54,7 @@ export default async function FeedPage() {
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-[var(--border)]">
-          {items.map((item, index) => (
-            <a
-              key={item.id}
-              href={`/item/${item.id}`}
-              className="flex items-start gap-3 px-3 py-2.5 hover:bg-[var(--muted)] transition-colors group"
-            >
-              <span className="text-sm text-[var(--muted-foreground)] font-medium mt-0.5 w-6 shrink-0 text-right">
-                {index + 1}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span
-                    className={`text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border ${
-                      item.source === "product_hunt"
-                        ? "bg-orange-50 text-orange-600 border-orange-200"
-                        : "bg-teal-50 text-teal-600 border-teal-200"
-                    }`}
-                  >
-                    {item.source === "product_hunt" ? "PH" : "Lenny"}
-                  </span>
-                  <h2 className="font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">
-                    {item.title}
-                  </h2>
-                </div>
-                {(item.tagline || item.ai_summary) && (
-                  <p className="text-sm text-[var(--muted-foreground)] line-clamp-1">
-                    {item.tagline || item.ai_summary}
-                  </p>
-                )}
-                <div className="flex items-center gap-2 mt-1 text-xs text-[var(--muted-foreground)]">
-                  {item.author && !item.author.includes("[REDACTED]") && (
-                    <>
-                      <span>{item.author}</span>
-                      <span>·</span>
-                    </>
-                  )}
-                  <span>{timeAgo(item.published_at)}</span>
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
+        <FeedTabs items={items} />
       )}
     </div>
   );

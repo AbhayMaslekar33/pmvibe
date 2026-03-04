@@ -79,7 +79,7 @@ export default function StreakPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-8">
         <h1 className="text-2xl font-bold">Your Streak</h1>
         <p className="text-[var(--muted-foreground)] text-sm">
           Consistency is the compounding interest of PM skill.
@@ -88,21 +88,21 @@ export default function StreakPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="rounded-xl border bg-[var(--card)] p-4 text-center">
+        <div className="rounded-xl border shadow-sm bg-[var(--card)] p-4 text-center">
           <Flame className="h-6 w-6 mx-auto mb-2 text-[var(--accent)]" />
           <p className="text-3xl font-bold">
             {streak?.current_streak ?? 0}
           </p>
           <p className="text-xs text-[var(--muted-foreground)]">Current</p>
         </div>
-        <div className="rounded-xl border bg-[var(--card)] p-4 text-center">
+        <div className="rounded-xl border shadow-sm bg-[var(--card)] p-4 text-center">
           <TrendingUp className="h-6 w-6 mx-auto mb-2 text-[var(--primary)]" />
           <p className="text-3xl font-bold">
             {streak?.longest_streak ?? 0}
           </p>
           <p className="text-xs text-[var(--muted-foreground)]">Longest</p>
         </div>
-        <div className="rounded-xl border bg-[var(--card)] p-4 text-center">
+        <div className="rounded-xl border shadow-sm bg-[var(--card)] p-4 text-center">
           <Calendar className="h-6 w-6 mx-auto mb-2 text-[var(--primary)]" />
           <p className="text-3xl font-bold">
             {streak?.total_days_active ?? 0}
@@ -112,7 +112,7 @@ export default function StreakPage() {
       </div>
 
       {/* Heatmap */}
-      <div className="rounded-xl border bg-[var(--card)] p-6">
+      <div className="rounded-xl border shadow-sm bg-[var(--card)] p-6">
         <h2 className="font-semibold mb-4">Last 12 Weeks</h2>
         <div className="grid grid-cols-12 gap-1">
           {days.map((day) => (
