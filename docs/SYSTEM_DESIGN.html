@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PMVIBE System Design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PMVIBE System Design</h1>
+</header>
+<h1 id="pmvibe-system-design-document">PMVIBE — System Design
+Document</h1>
+<h2 id="overview">Overview</h2>
+<p>PMVIBE is an AI-powered product intelligence platform that helps
+Product Managers develop real product intuition. It aggregates
+real-world product launches and expert PM content, summarizes them using
+a local LLM, and provides structured prompts for users to practice
+product thinking daily.</p>
+<p><strong>Live URL:</strong> https://pmvibe-52h8.vercel.app
+<strong>Repo:</strong> github.com/AbhayMaslekar33/pmvibe</p>
+<hr />
+<h2 id="layer-1-data-ingestion-pipeline">Layer 1: Data Ingestion
+Pipeline</h2>
+<h3 id="purpose">Purpose</h3>
+<p>Automatically fetches, processes, and stores product content from
+external sources. This is the engine that keeps the platform alive with
+fresh content.</p>
+<h3 id="components">Components</h3>
+<p><strong>1.1 Data Sources</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Source</th>
+<th>Type</th>
+<th>What it provides</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Product Hunt</td>
+<td>GraphQL API</td>
+<td>Daily top product launches — name, tagline, description, thumbnail,
+makers, votes</td>
+<td>Daily</td>
+</tr>
+<tr>
+<td>Lenny’s Newsletter</td>
+<td>RSS Feed (Substack)</td>
+<td>Expert PM articles — title, full article content, publication
+date</td>
+<td>Every 6 hours</td>
+</tr>
+</tbody>
+</table>
+<p><strong>1.2 n8n Automation (localhost:5678)</strong></p>
+<p>Two separate workflows, each with 5 nodes:</p>
+<p><strong>Workflow A — Product Hunt:</strong></p>
+<pre><code>Cron Trigger → Fetch PH API (GraphQL) → Split Into Items → Summarize with Ollama → Upsert to Supabase</code></pre>
+<ul>
+<li>Node 1: Cron trigger (daily at 08:00 UTC)</li>
+<li>Node 2: HTTP POST to PH GraphQL API with Bearer token, fetches top
+20 posts</li>
+<li>Node 3: Split Out node — extracts individual <code>node</code>
+objects from the GraphQL <code>edges</code> array</li>
+<li>Node 4: Code node (Run Once for Each Item) — sends each product to
+Ollama for AI summarization, parses response, builds the
+<code>content_items</code> row</li>
+<li>Node 5: Code node (Run Once for Each Item) — upserts the row to
+Supabase via REST API using service_role key</li>
+</ul>
+<p><strong>Workflow B — Lenny’s Newsletter:</strong></p>
+<pre><code>Cron Trigger → Fetch RSS Feed → Parse RSS XML → Summarize with Ollama → Upsert to Supabase</code></pre>
+<ul>
+<li>Node 1: Cron trigger (every 6 hours)</li>
+<li>Node 2: HTTP GET to
+<code>https://www.lennysnewsletter.com/feed</code></li>
+<li>Node 3: Code node (Run Once for All Items) — custom XML parser that
+extracts <code>&lt;item&gt;</code> elements, strips HTML from content,
+filters to last 14 days</li>
+<li>Node 4: Code node (Run Once for Each Item) — aggressively strips
+HTML (script, style, svg, picture tags, URLs), sends cleaned text to
+Ollama, parses JSON response</li>
+<li>Node 5: Code node (Run Once for Each Item) — upserts to
+Supabase</li>
+</ul>
+<p><strong>1.3 Ollama LLM (localhost:11434)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>qwen3-vl:30b</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.3 (low creativity, high accuracy)</td>
+</tr>
+<tr>
+<td>Max tokens</td>
+<td>800</td>
+</tr>
+<tr>
+<td>Timeout</td>
+<td>900 seconds (set via N8N_RUNNERS_TASK_TIMEOUT)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What Ollama produces per item:</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;summary&quot;</span><span class="fu">:</span> <span class="st">&quot;3-4 sentence summary covering what it does, who it&#39;s for, why it matters&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;key_insights&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;insight 1&quot;</span><span class="ot">,</span> <span class="st">&quot;insight 2&quot;</span><span class="ot">,</span> <span class="st">&quot;insight 3&quot;</span><span class="ot">,</span> <span class="st">&quot;insight 4&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;opinion_prompts&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;PM question 1&quot;</span><span class="ot">,</span> <span class="st">&quot;PM question 2&quot;</span><span class="ot">,</span> <span class="st">&quot;PM question 3&quot;</span><span class="ot">,</span> <span class="st">&quot;PM question 4&quot;</span><span class="ot">,</span> <span class="st">&quot;PM question 5&quot;</span><span class="ot">]</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Prompt strategy:</strong> - Product Hunt prompts focus on:
+problem clarity, user persona, competitive moat, metrics, red flags -
+Lenny prompts focus on: core argument, applicability, counter-arguments,
+stage sensitivity, interview takeaways</p>
+<p><strong>1.4 Data Quality Issues (Known)</strong> - PH API redacts
+maker names → stored as empty string - Lenny RSS sometimes has duplicate
+articles with slightly different URLs → deduplication via
+<code>UNIQUE(source, external_id)</code> constraint - Ollama
+occasionally returns malformed JSON → defensive parsing with regex
+fallback - Large articles can timeout on 30B model → 900s timeout
+configured</p>
+<hr />
+<h2 id="layer-2-database-supabase-postgresql">Layer 2: Database
+(Supabase PostgreSQL)</h2>
+<h3 id="purpose-1">Purpose</h3>
+<p>Stores all content, user data, and engagement metrics. Enforces data
+integrity and access control via RLS.</p>
+<h3 id="project">Project</h3>
+<ul>
+<li><strong>Ref:</strong> nnheztimdtihbgojtunw</li>
+<li><strong>URL:</strong> https://nnheztimdtihbgojtunw.supabase.co</li>
+<li><strong>Schema:</strong> public</li>
+</ul>
+<h3 id="tables">Tables</h3>
+<p><strong>2.1 content_items</strong> — The core content table</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID (PK)</td>
+<td>Auto-generated</td>
+</tr>
+<tr>
+<td>source</td>
+<td>TEXT</td>
+<td>‘product_hunt’ or ‘lenny’</td>
+</tr>
+<tr>
+<td>external_id</td>
+<td>TEXT</td>
+<td>PH post ID or Lenny article URL</td>
+</tr>
+<tr>
+<td>source_url</td>
+<td>TEXT</td>
+<td>Link to original content</td>
+</tr>
+<tr>
+<td>title</td>
+<td>TEXT</td>
+<td>Content title</td>
+</tr>
+<tr>
+<td>tagline</td>
+<td>TEXT</td>
+<td>Short description (PH only)</td>
+</tr>
+<tr>
+<td>thumbnail_url</td>
+<td>TEXT</td>
+<td>Image URL (PH only)</td>
+</tr>
+<tr>
+<td>author</td>
+<td>TEXT</td>
+<td>Author/maker names</td>
+</tr>
+<tr>
+<td>published_at</td>
+<td>TIMESTAMPTZ</td>
+<td>When the content was originally published</td>
+</tr>
+<tr>
+<td>ai_summary</td>
+<td>TEXT</td>
+<td>Ollama-generated summary</td>
+</tr>
+<tr>
+<td>ai_key_insights</td>
+<td>JSONB</td>
+<td>Array of 4 insights (stored as JSON string)</td>
+</tr>
+<tr>
+<td>ai_opinion_prompts</td>
+<td>JSONB</td>
+<td>Array of 5 PM prompts (stored as JSON string)</td>
+</tr>
+<tr>
+<td>ai_processed_at</td>
+<td>TIMESTAMPTZ</td>
+<td>When Ollama processed this item</td>
+</tr>
+<tr>
+<td>raw_data</td>
+<td>JSONB</td>
+<td>Original source data for debugging</td>
+</tr>
+<tr>
+<td>ingested_at</td>
+<td>TIMESTAMPTZ</td>
+<td>When n8n inserted this row</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>TIMESTAMPTZ</td>
+<td>Auto-updated via trigger</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Constraint:</strong> <code>UNIQUE(source, external_id)</code>
+— prevents duplicate content on re-runs. Upsert uses
+<code>Prefer: resolution=merge-duplicates</code>.</p>
+<p><strong>Who writes:</strong> Only n8n (via service_role key, bypasses
+RLS) <strong>Who reads:</strong> All authenticated users (via RLS SELECT
+policy)</p>
+<hr />
+<p><strong>2.2 reflections</strong> — User’s free-form journal
+entries</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID (PK)</td>
+<td>Auto-generated</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>UUID (FK → auth.users)</td>
+<td>The user who wrote this</td>
+</tr>
+<tr>
+<td>content_item_id</td>
+<td>UUID (FK → content_items)</td>
+<td>Which content item this is about</td>
+</tr>
+<tr>
+<td>body</td>
+<td>TEXT</td>
+<td>The reflection text</td>
+</tr>
+<tr>
+<td>word_count</td>
+<td>INT</td>
+<td>Auto-computed from body</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Constraint:</strong>
+<code>UNIQUE(user_id, content_item_id)</code> — one reflection per item
+per user <strong>RLS:</strong> Users can only CRUD their own
+reflections</p>
+<hr />
+<p><strong>2.3 opinion_responses</strong> — Structured answers to PM
+prompts</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID (PK)</td>
+<td>Auto-generated</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>UUID (FK)</td>
+<td>The user</td>
+</tr>
+<tr>
+<td>content_item_id</td>
+<td>UUID (FK)</td>
+<td>Which content item</td>
+</tr>
+<tr>
+<td>prompt_index</td>
+<td>INT</td>
+<td>Which prompt (0-4)</td>
+</tr>
+<tr>
+<td>prompt_text</td>
+<td>TEXT</td>
+<td>The prompt question text</td>
+</tr>
+<tr>
+<td>response_body</td>
+<td>TEXT</td>
+<td>User’s answer</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Constraint:</strong>
+<code>UNIQUE(user_id, content_item_id, prompt_index)</code> — one answer
+per prompt per user <strong>RLS:</strong> Users can only CRUD their own
+responses</p>
+<hr />
+<p><strong>2.4 daily_activity</strong> — One row per user per UTC
+date</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID (PK)</td>
+<td>Auto-generated</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>UUID (FK)</td>
+<td>The user</td>
+</tr>
+<tr>
+<td>activity_date</td>
+<td>DATE</td>
+<td>UTC date</td>
+</tr>
+<tr>
+<td>items_read</td>
+<td>INT</td>
+<td>Count of items read that day</td>
+</tr>
+<tr>
+<td>reflections_written</td>
+<td>INT</td>
+<td>Count of reflections</td>
+</tr>
+<tr>
+<td>opinions_answered</td>
+<td>INT</td>
+<td>Count of opinions submitted</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Constraint:</strong>
+<code>UNIQUE(user_id, activity_date)</code> <strong>Writes:</strong>
+Only via <code>upsert_daily_activity()</code> SECURITY DEFINER function
+— users cannot write directly</p>
+<hr />
+<p><strong>2.5 user_streaks</strong> — Derived streak data</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>user_id</td>
+<td>UUID (PK, FK)</td>
+<td>The user</td>
+</tr>
+<tr>
+<td>current_streak</td>
+<td>INT</td>
+<td>Consecutive active days ending today/yesterday</td>
+</tr>
+<tr>
+<td>longest_streak</td>
+<td>INT</td>
+<td>All-time longest streak</td>
+</tr>
+<tr>
+<td>last_active_date</td>
+<td>DATE</td>
+<td>Most recent engaged day</td>
+</tr>
+<tr>
+<td>total_days_active</td>
+<td>INT</td>
+<td>Total days with engagement</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Writes:</strong> Only via <code>recalculate_streak()</code>
+SECURITY DEFINER function <strong>Definition of “active day”:</strong>
+At least 1 reflection written OR 1 opinion answered. Reading alone
+doesn’t count.</p>
+<hr />
+<p><strong>2.6 user_profiles</strong> — Extended user metadata</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>user_id</td>
+<td>UUID (PK, FK)</td>
+<td>The user</td>
+</tr>
+<tr>
+<td>display_name</td>
+<td>TEXT</td>
+<td>User’s display name</td>
+</tr>
+<tr>
+<td>pm_experience_level</td>
+<td>TEXT</td>
+<td>Beginner/Intermediate/Advanced</td>
+</tr>
+<tr>
+<td>preferred_sources</td>
+<td>TEXT[]</td>
+<td>Array of preferred content sources</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Auto-created:</strong> Trigger fires on new auth.users row →
+inserts default profile + streak row</p>
+<hr />
+<h3 id="database-functions-security-definer">Database Functions
+(SECURITY DEFINER)</h3>
+<p><strong><code>upsert_daily_activity(p_user_id, p_date, p_reflection_delta, p_opinion_delta, p_read_delta)</code></strong>
+- Atomically increments daily activity counts - Creates row if it
+doesn’t exist for that date - Called after every reflection save or
+opinion submit</p>
+<p><strong><code>recalculate_streak(p_user_id)</code></strong> - Walks
+backwards from today through daily_activity rows - Computes current
+consecutive streak, updates longest if higher - Called after every
+<code>upsert_daily_activity</code></p>
+<p><strong><code>handle_new_user()</code></strong> - Trigger on
+<code>auth.users</code> INSERT - Creates user_profiles and user_streaks
+rows with defaults</p>
+<hr />
+<h3 id="row-level-security-rls">Row Level Security (RLS)</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Authenticated User</th>
+<th>n8n (service_role)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>content_items</td>
+<td>SELECT all</td>
+<td>Full access (bypasses RLS)</td>
+</tr>
+<tr>
+<td>reflections</td>
+<td>SELECT/INSERT/UPDATE/DELETE own</td>
+<td>Full access</td>
+</tr>
+<tr>
+<td>opinion_responses</td>
+<td>SELECT/INSERT/UPDATE own</td>
+<td>Full access</td>
+</tr>
+<tr>
+<td>daily_activity</td>
+<td>SELECT own (writes via function)</td>
+<td>Full access</td>
+</tr>
+<tr>
+<td>user_streaks</td>
+<td>SELECT own (writes via function)</td>
+<td>Full access</td>
+</tr>
+<tr>
+<td>user_profiles</td>
+<td>SELECT/INSERT/UPDATE own</td>
+<td>Full access</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="layer-3-application-next.js-16-on-vercel">Layer 3: Application
+(Next.js 16 on Vercel)</h2>
+<h3 id="purpose-2">Purpose</h3>
+<p>The user-facing web application. Server-rendered pages, client-side
+interactivity, API routes for data mutations.</p>
+<h3 id="architecture">Architecture</h3>
+<ul>
+<li><strong>Framework:</strong> Next.js 16 (App Router, Turbopack)</li>
+<li><strong>Language:</strong> TypeScript</li>
+<li><strong>Styling:</strong> Tailwind CSS v4 with CSS custom
+properties</li>
+<li><strong>Auth:</strong> Supabase Auth via <code>@supabase/ssr</code>
+(PKCE flow)</li>
+<li><strong>Icons:</strong> lucide-react</li>
+</ul>
+<h3 id="route-structure">Route Structure</h3>
+<p><strong>Public routes (no login required):</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Route</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>Redirect</td>
+<td>Redirects to <code>/feed</code></td>
+</tr>
+<tr>
+<td><code>/feed</code></td>
+<td>Server Component</td>
+<td>List of all content items, newest first. 5-min ISR cache. Shows
+signup CTA for anonymous users.</td>
+</tr>
+<tr>
+<td><code>/item/[id]</code></td>
+<td>Server Component</td>
+<td>Item detail — AI summary, key insights, opinion prompts, reflection
+editor. Prompts/reflections require auth to save.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Auth routes:</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Route</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/login</code></td>
+<td>Client Component</td>
+<td>Email + password login form</td>
+</tr>
+<tr>
+<td><code>/signup</code></td>
+<td>Client Component</td>
+<td>Email + password signup with confirmation</td>
+</tr>
+<tr>
+<td><code>/confirm</code></td>
+<td>Static</td>
+<td>Email confirmation pending page</td>
+</tr>
+<tr>
+<td><code>/api/auth/callback</code></td>
+<td>API Route</td>
+<td>Supabase PKCE callback handler</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Protected routes (login required):</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Route</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/journal</code></td>
+<td>Client Component</td>
+<td>Searchable list of user’s reflections, joined with
+content_items</td>
+</tr>
+<tr>
+<td><code>/streak</code></td>
+<td>Client Component</td>
+<td>Current streak, longest streak, 84-day heatmap</td>
+</tr>
+<tr>
+<td><code>/settings</code></td>
+<td>Client Component</td>
+<td>Profile preferences (display name, experience level, sources)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>API routes:</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Route</th>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/reflections</code></td>
+<td>GET/POST</td>
+<td>Fetch user reflections; upsert reflection + update streak</td>
+</tr>
+<tr>
+<td><code>/api/reflections/[id]</code></td>
+<td>DELETE</td>
+<td>Delete a reflection</td>
+</tr>
+<tr>
+<td><code>/api/opinions</code></td>
+<td>GET/POST</td>
+<td>Fetch user opinions; upsert opinion + update streak</td>
+</tr>
+<tr>
+<td><code>/api/opinions/[id]</code></td>
+<td>DELETE</td>
+<td>Delete an opinion</td>
+</tr>
+<tr>
+<td><code>/api/activity</code></td>
+<td>POST</td>
+<td>Record a read event</td>
+</tr>
+<tr>
+<td><code>/api/webhooks/n8n</code></td>
+<td>POST</td>
+<td>n8n calls this after ingestion → revalidatePath(‘/feed’)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="middleware">Middleware</h3>
+<ul>
+<li>Refreshes Supabase auth session on every request</li>
+<li>Redirects unauthenticated users from protected routes to
+<code>/login</code></li>
+<li>Redirects authenticated users from auth routes to
+<code>/feed</code></li>
+<li><code>/feed</code> and <code>/item</code> are public — no
+redirect</li>
+</ul>
+<h3 id="key-components">Key Components</h3>
+<p><strong>Sidebar
+(<code>src/components/nav/Sidebar.tsx</code>)</strong> - Fixed left
+sidebar on desktop (hidden on mobile) - Shows: Feed for all users;
+Journal, Streak, Settings, Logout for authenticated; Login, Sign Up for
+anonymous - Checks auth state client-side via
+<code>supabase.auth.getUser()</code></p>
+<p><strong>MobileNav
+(<code>src/components/nav/MobileNav.tsx</code>)</strong> - Fixed bottom
+nav on mobile (hidden on desktop) - Same conditional rendering as
+Sidebar</p>
+<p><strong>OpinionPrompts
+(<code>src/components/item/OpinionPrompts.tsx</code>)</strong> - Client
+component - Loads existing responses from <code>/api/opinions</code> - 5
+prompts with individual textareas and save buttons - Progress bar
+showing completion (X/5) - Each save triggers: upsert opinion →
+upsert_daily_activity → recalculate_streak</p>
+<p><strong>ReflectionEditor
+(<code>src/components/item/ReflectionEditor.tsx</code>)</strong> -
+Client component - Textarea with 3-second debounce autosave - Immediate
+save on blur - Shows “Saving…” / “Saved” indicator - Each save triggers:
+upsert reflection → upsert_daily_activity → recalculate_streak</p>
+<h3 id="data-flow-user-writes-reflection">Data Flow: User Writes
+Reflection</h3>
+<pre><code>User types in ReflectionEditor
+  → 3s debounce
+  → POST /api/reflections { content_item_id, body }
+  → Supabase: UPSERT reflections
+  → Supabase: SELECT upsert_daily_activity(user_id, today, 1, 0, 0)
+  → Supabase: SELECT recalculate_streak(user_id)
+  → Response: { reflection, streak }</code></pre>
+<hr />
+<h2 id="layer-4-infrastructure-deployment">Layer 4: Infrastructure &amp;
+Deployment</h2>
+<h3 id="hosting">Hosting</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Purpose</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vercel</td>
+<td>Next.js hosting, auto-deploy from GitHub main</td>
+<td>Free tier</td>
+</tr>
+<tr>
+<td>Supabase Cloud</td>
+<td>PostgreSQL, Auth, REST API</td>
+<td>Free tier</td>
+</tr>
+<tr>
+<td>n8n</td>
+<td>Workflow automation</td>
+<td>Local (free)</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td>LLM inference</td>
+<td>Local (free)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deployment-flow">Deployment Flow</h3>
+<pre><code>Developer pushes to main
+  → GitHub receives push
+  → Vercel auto-builds and deploys
+  → Live at pmvibe-52h8.vercel.app</code></pre>
+<h3 id="caching">Caching</h3>
+<ul>
+<li>Feed page: <code>revalidate = 300</code> (ISR, 5 minutes)</li>
+<li>n8n webhook: calls <code>revalidatePath('/feed')</code> for
+immediate cache bust after ingestion</li>
+<li>Item detail pages: dynamic (no cache), always fresh from
+Supabase</li>
+</ul>
+<h3 id="environment-variables">Environment Variables</h3>
+<p><strong>Next.js (.env.local on Vercel):</strong> -
+<code>NEXT_PUBLIC_SUPABASE_URL</code> — Supabase project URL -
+<code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> — Public anon key (safe for
+client) - <code>SUPABASE_SERVICE_ROLE_KEY</code> — Server-only, bypasses
+RLS - <code>N8N_WEBHOOK_SECRET</code> — Shared secret for webhook
+auth</p>
+<p><strong>n8n (hardcoded in nodes, free plan):</strong> - Product Hunt
+token (Bearer) - Supabase service_role key - Ollama URL
+(http://127.0.0.1:11434)</p>
+<h3 id="security">Security</h3>
+<ul>
+<li>All tables have RLS policies</li>
+<li>Streak/activity writes go through SECURITY DEFINER functions (users
+can’t manipulate streaks)</li>
+<li>Auth uses <code>getUser()</code> server-side (not
+<code>getSession()</code> which can be spoofed)</li>
+<li>n8n webhook validates <code>x-n8n-secret</code> header</li>
+<li>Service role key only used server-side and in n8n</li>
+</ul>
+<hr />
+<h2 id="current-state-summary">Current State Summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Content items in DB</td>
+<td>~32 (20 PH + 12 Lenny)</td>
+</tr>
+<tr>
+<td>Active data sources</td>
+<td>2 (Product Hunt, Lenny)</td>
+</tr>
+<tr>
+<td>n8n workflows</td>
+<td>2 (manual trigger, not yet scheduled)</td>
+</tr>
+<tr>
+<td>Registered users</td>
+<td>1 (you)</td>
+</tr>
+<tr>
+<td>Pages</td>
+<td>8 (feed, item, journal, streak, settings, login, signup,
+confirm)</td>
+</tr>
+<tr>
+<td>API routes</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Database tables</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Database functions</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
