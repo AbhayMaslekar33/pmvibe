@@ -1,6 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
+export const revalidate = 300; // 5 minutes
+
+function timeAgo(date: string) {
+  const seconds = Math.floor(
+    (Date.now() - new Date(date).getTime()) / 1000
+  );
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "yesterday";
+  return `${days}d ago`;
+}
+
 export default async function FeedPage() {
   const supabase = await createClient();
 
@@ -11,8 +27,9 @@ export default async function FeedPage() {
   const { data: items } = await supabase
     .from("content_items")
     .select(
-      "id, source, title, tagline, thumbnail_url, author, published_at, ai_summary"
+      "id, source, title, tagline, author, published_at, ai_summary"
     )
+    .neq("title", "")
     .order("published_at", { ascending: false })
     .limit(50);
 
@@ -50,44 +67,46 @@ export default async function FeedPage() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+        <div className="space-y-1">
+          {items.map((item, index) => (
             <a
               key={item.id}
               href={`/item/${item.id}`}
-              className="block rounded-xl border bg-[var(--card)] p-4 hover:shadow-md transition-shadow"
+              className="flex items-start gap-4 px-4 py-3 rounded-lg hover:bg-[var(--muted)] transition-colors group"
             >
-              {item.thumbnail_url && (
-                <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-[var(--muted)]">
-                  <img
-                    src={item.thumbnail_url}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    item.source === "product_hunt"
-                      ? "bg-orange-100 text-orange-700"
-                      : "bg-blue-100 text-blue-700"
-                  }`}
-                >
-                  {item.source === "product_hunt" ? "Product Hunt" : "Lenny"}
-                </span>
-                {item.author && (
-                  <span className="text-xs text-[var(--muted-foreground)]">
-                    {item.author}
+              <span className="text-sm text-[var(--muted-foreground)] font-medium mt-0.5 w-6 shrink-0 text-right">
+                {index + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span
+                    className={`text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                      item.source === "product_hunt"
+                        ? "bg-orange-100 text-orange-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {item.source === "product_hunt" ? "PH" : "Lenny"}
                   </span>
+                  <h2 className="font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">
+                    {item.title}
+                  </h2>
+                </div>
+                {(item.tagline || item.ai_summary) && (
+                  <p className="text-sm text-[var(--muted-foreground)] line-clamp-1">
+                    {item.tagline || item.ai_summary}
+                  </p>
                 )}
+                <div className="flex items-center gap-2 mt-1 text-xs text-[var(--muted-foreground)]">
+                  {item.author && !item.author.includes("[REDACTED]") && (
+                    <>
+                      <span>{item.author}</span>
+                      <span>·</span>
+                    </>
+                  )}
+                  <span>{timeAgo(item.published_at)}</span>
+                </div>
               </div>
-              <h2 className="font-semibold mb-1 line-clamp-2">{item.title}</h2>
-              {item.tagline && (
-                <p className="text-sm text-[var(--muted-foreground)] line-clamp-2">
-                  {item.tagline}
-                </p>
-              )}
             </a>
           ))}
         </div>
