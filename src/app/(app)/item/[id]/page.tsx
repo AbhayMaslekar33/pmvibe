@@ -65,10 +65,10 @@ export default async function ItemDetailPage({
       <div>
         <div className="flex items-center gap-2 mb-3">
           <span
-            className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            className={`text-xs font-medium px-2 py-0.5 rounded border ${
               item.source === "product_hunt"
-                ? "bg-orange-100 text-orange-700"
-                : "bg-blue-100 text-blue-700"
+                ? "bg-orange-50 text-orange-600 border-orange-200"
+                : "bg-teal-50 text-teal-600 border-teal-200"
             }`}
           >
             {item.source === "product_hunt" ? "Product Hunt" : "Lenny"}
@@ -79,7 +79,7 @@ export default async function ItemDetailPage({
             </span>
           )}
         </div>
-        <h1 className="text-3xl font-bold mb-2">{item.title}</h1>
+        <h1 className="text-2xl font-bold mb-2">{item.title}</h1>
         {item.tagline && (
           <p className="text-lg text-[var(--muted-foreground)]">
             {item.tagline}
@@ -111,7 +111,7 @@ export default async function ItemDetailPage({
                     key={i}
                     className="text-sm text-[var(--muted-foreground)] flex gap-2"
                   >
-                    <span className="text-[var(--primary)] mt-0.5">-</span>
+                    <span className="text-[var(--primary)] mt-0.5">·</span>
                     {insight}
                   </li>
                 ))}

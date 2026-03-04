@@ -103,7 +103,7 @@ export default function StreakPage() {
           <p className="text-xs text-[var(--muted-foreground)]">Longest</p>
         </div>
         <div className="rounded-xl border bg-[var(--card)] p-4 text-center">
-          <Calendar className="h-6 w-6 mx-auto mb-2 text-green-500" />
+          <Calendar className="h-6 w-6 mx-auto mb-2 text-[var(--primary)]" />
           <p className="text-3xl font-bold">
             {streak?.total_days_active ?? 0}
           </p>

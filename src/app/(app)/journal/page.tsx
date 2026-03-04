@@ -92,10 +92,10 @@ export default function JournalPage() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <span
-                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  className={`text-xs font-medium px-2 py-0.5 rounded border ${
                     entry.content_items.source === "product_hunt"
-                      ? "bg-orange-100 text-orange-700"
-                      : "bg-blue-100 text-blue-700"
+                      ? "bg-orange-50 text-orange-600 border-orange-200"
+                      : "bg-teal-50 text-teal-600 border-teal-200"
                   }`}
                 >
                   {entry.content_items.source === "product_hunt"

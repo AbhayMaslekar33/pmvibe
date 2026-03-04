@@ -8,11 +8,21 @@ All notable changes to PMVIBE are documented here.
 
 ## 2026-03-04
 
+### Changed
+- **UI Overhaul (PRD: UI-Overhaul-V1)** — complete visual refresh
+  - Primary color: blue (#2563eb) → teal (#0d9488)
+  - Background: off-white (#fafafa) → pure white (#ffffff)
+  - Source badges: filled → outlined style, Lenny badge now teal (was blue)
+  - Feed items: divider lines between items, tighter spacing
+  - Item detail: smaller title (3xl → 2xl), bullet style changed
+  - Sidebar: teal left border on active nav item
+  - Streak page: calendar icon uses primary color (was hardcoded green)
+  - Settings: "Saved" text uses primary color (was hardcoded green)
+  - Auth pages: clean white background (was grey)
+- Removed dark mode — light theme only for all users
+
 ### Fixed
 - Anonymous users can now see feed articles (added `anon` SELECT policy to `content_items`)
-
-### Changed
-- Removed dark mode — light theme only for all users
 
 ### Added
 - System design document (`docs/SYSTEM_DESIGN.md`)

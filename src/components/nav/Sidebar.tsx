@@ -65,7 +65,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-[var(--secondary)] text-[var(--secondary-foreground)]"
+                  ? "bg-[var(--secondary)] text-[var(--secondary-foreground)] border-l-2 border-l-[var(--primary)]"
                   : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
               )}
             >

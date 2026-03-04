@@ -67,12 +67,12 @@ export default async function FeedPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="divide-y divide-[var(--border)]">
           {items.map((item, index) => (
             <a
               key={item.id}
               href={`/item/${item.id}`}
-              className="flex items-start gap-4 px-4 py-3 rounded-lg hover:bg-[var(--muted)] transition-colors group"
+              className="flex items-start gap-3 px-3 py-2.5 hover:bg-[var(--muted)] transition-colors group"
             >
               <span className="text-sm text-[var(--muted-foreground)] font-medium mt-0.5 w-6 shrink-0 text-right">
                 {index + 1}
@@ -80,10 +80,10 @@ export default async function FeedPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <span
-                    className={`text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                    className={`text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border ${
                       item.source === "product_hunt"
-                        ? "bg-orange-100 text-orange-700"
-                        : "bg-blue-100 text-blue-700"
+                        ? "bg-orange-50 text-orange-600 border-orange-200"
+                        : "bg-teal-50 text-teal-600 border-teal-200"
                     }`}
                   >
                     {item.source === "product_hunt" ? "PH" : "Lenny"}

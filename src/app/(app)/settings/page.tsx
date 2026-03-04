@@ -105,7 +105,7 @@ export default function SettingsPage() {
             {saving ? "Saving..." : "Save"}
           </button>
           {saved && (
-            <span className="text-sm text-green-600">Saved</span>
+            <span className="text-sm text-[var(--primary)]">Saved</span>
           )}
         </div>
       </form>
@@ -114,7 +114,7 @@ export default function SettingsPage() {
 
       <button
         onClick={handleLogout}
-        className="px-6 py-2 rounded-lg border text-[var(--destructive)] hover:bg-red-50 transition-colors font-medium"
+        className="px-6 py-2 rounded-lg border text-[var(--destructive)] hover:bg-red-50/50 transition-colors font-medium"
       >
         Log Out
       </button>
